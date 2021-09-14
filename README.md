@@ -99,6 +99,7 @@ const User = new mongoose.model('User', userSchema);
 ```
 <br />
 
+### Created Level-1 Security
 12. Handled the HTTP 'POST' requests made on the `/register` route, so that it creates a new user document in the database to store their emails and passwords:
 ```javascript
 app.post('/register', (req, res) => {
@@ -147,6 +148,7 @@ app.get('/logout', (req, res) => {
 ```
 <br />
 
+### Created Level-2 Security
 15. Installed the `mongoose-encryption` NPM module using `npm i mongoose-encryption` command and required the same inside our `app.js` file:
 ```javascript
 const encrypt = require('mongoose-encryption');
@@ -161,4 +163,4 @@ userSchema.plugin(encrypt, { secret: secret, encryptedFields: ['password'] });
 ```
 <br />
 
-17. `mongoose-encryption` package is smart enough to decrypt the passwords from the database whenever POST requests are created on the `/login` route.
+17. `mongoose-encryption` package is smart enough to decrypt the passwords from the database whenever POST requests are created on the `/login` route. Anyone having access to the server code in `app.js` file can get access to the all users' passwords.
