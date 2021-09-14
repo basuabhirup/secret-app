@@ -8,7 +8,7 @@ This project is a part of "The Complete 2021 Web Development Bootcamp" by The Lo
 - To enable users to log into the app using their username and password to access to the secrets.
 
 ## Steps I have followed:
-1. Created a dedicated directory for the project and initialised NPM inside that directory using `npm init -y` command from the terminal.
+1. Initialized NPM inside the project directory using `npm init -y` command from the terminal.
 2. Used `npm i express body-parser ejs mongoose dotenv` command to install these dependencies for our project.
 3. Initialized the server with the following code inside the `app.js` file:
 ```javascript
@@ -173,7 +173,7 @@ const user = new User({
 ```
 <br />
 
-* Modified the logic inside the handler function of the 'POST' requests made on the `/register` route:
+* Modified the logic inside the handler function of the 'POST' requests made on the `/login` route:
 ```javascript
 if(user.password === md5(req.body.password)) {
   res.render('secrets');
