@@ -9,13 +9,15 @@ This project is a part of "The Complete 2021 Web Development Bootcamp" by The Lo
 
 ## Steps I have followed:
 1. Created a dedicated directory for the project and initialised NPM inside that directory using `npm init -y` command from the terminal.
-2. Used `npm i express body-parser ejs` command to install these dependencies for our project.
+2. Used `npm i express body-parser ejs mongoose dotenv` command to install these dependencies for our project.
 3. Initialized the server with the following code inside the `app.js` file:
 ```javascript
 // Require necessary NPM modules:
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const ejs = require('ejs');
+const mongoose = require('mongoose');
 
 // Assign a port for localhost as well as final deployement:
 const port = process.env.PORT || 3000;
@@ -25,6 +27,11 @@ const app = express();
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
+
+
+// Connect to a new MongoDB Database, using Mongoose ODM:
+
+// Create a new collection inside the database to store data:
 
 
 
@@ -64,31 +71,21 @@ npm-debug.log
 ```
 <br />
 
-6. Changed the default branch to `main` using `git branch -M main` command and linked to this remote github repository using `git remote add origin` command.
-7. Installed `mongoose` and `dotenv` modules using `npm i mongoose dotenv` command.
-8. Required these newly installed dependencies from the `app.js` file:
-```javascript
-// Require necessary NPM modules:
-require('dotenv').config();
-const mongoose = require('mongoose');
-```
-<br />
-
-9. Created a `.env` file to store all the encryption keys / database passwords as environment variables and made sure that the `.env` file is not being tracked by git:
+6. Created a `.env` file to store all the encryption keys / database passwords as environment variables and made sure that the `.env` file is not being tracked by git:
 ```
 DB_USER=my_user_name
 DB_PASS=Abc123xyz789
 ```
 <br />
 
-10. Connected the server to a new database named `userDB` in MongoDB Atlas Cluster, using Mongoose ODM:
+7. Connected the server to a new database named `userDB` in MongoDB Atlas Cluster, using Mongoose ODM:
 ```javascript
 // Connect to a new MongoDB Database, using Mongoose ODM:
 mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.m5s9h.mongodb.net/userDB`);
 ```
 <br />
 
-11. Created a new collection named `users` inside `userDB` to store the emails and passwords of all the users:
+8. Created a new collection named `users` inside `userDB` to store the emails and passwords of all the users:
 ```javascript
 // Create a new collection named 'users' to store the emails and passwords of the users:
 const userSchema = new mongoose.Schema({
@@ -99,8 +96,10 @@ const User = new mongoose.model('User', userSchema);
 ```
 <br />
 
-### Created Level-1 Security
-12. Handled the HTTP 'POST' requests made on the `/register` route, so that it creates a new user document in the database to store their emails and passwords:
+9. Experimented and went through 6 levels of security
+
+### Level 1 Security: Login with registered Username and Password
+* Handled the HTTP 'POST' requests made on the `/register` route, so that it creates a new user document in the database to store their emails and passwords:
 ```javascript
 app.post('/register', (req, res) => {
   const user = new User({
@@ -118,7 +117,7 @@ app.post('/register', (req, res) => {
 ```
 <br />
 
-13. Handled the HTTP 'POST' requests made on the `/login` route, so that the registered users can seamlessly login to the app with their credentials:
+* Handled the HTTP 'POST' requests made on the `/login` route, so that the registered users can seamlessly login to the app with their credentials:
 ```javascript
 app.post('/login', (req, res) => {
   User.findOne({email: req.body.username}, (err, user) => {
@@ -140,22 +139,14 @@ app.post('/login', (req, res) => {
 ```
 <br />
 
-14. Handled the HTTP 'GET' requests made on the '/logout' route, so that the logged in users can log out:
-```javascript
-app.get('/logout', (req, res) => {
-  res.redirect('/')
-})
-```
-<br />
-
-### Created Level-2 Security
-15. Installed the `mongoose-encryption` NPM module using `npm i mongoose-encryption` command and required the same inside our `app.js` file:
+### Level 2 Security: Database Encryption
+* Installed the `mongoose-encryption` NPM module using `npm i mongoose-encryption` command and required the same inside our `app.js` file:
 ```javascript
 const encrypt = require('mongoose-encryption');
 ```
 <br />
 
-16. Created a long unguessable secret key as an environment variable inside the `.env` file and added an encryption package to our userSchema to keep the users' passwords encrypted:
+* Created a long unguessable secret key as an environment variable inside the `.env` file and added an encryption package to our userSchema to keep the users' passwords encrypted:
 ```javascript
 // Add the encryption package to our userSchema before creating the User model:
 let secret = process.env.SECRET_STRING;
@@ -163,4 +154,37 @@ userSchema.plugin(encrypt, { secret: secret, encryptedFields: ['password'] });
 ```
 <br />
 
-17. `mongoose-encryption` package is smart enough to decrypt the passwords from the database whenever POST requests are created on the `/login` route. Anyone having access to the server code in `app.js` file can get access to the all users' passwords.
+* `mongoose-encryption` package is smart enough to decrypt the passwords from the database whenever POST requests are created on the `/login` route. Therefore, anyone having access to the server code in `app.js` file can get access to all the users' passwords.
+
+### Level 3 Security: Hashing passwords
+* Insalled the `md5` module using `npm i md5` command and required the same in our `app.js` file:
+```javascript
+const md5 = require('md5');
+```
+<br />
+
+* Modified the user object inside the handler function of the 'POST' requests made on the `/register` route, so that instead of storing the users' passwords in our database, we use our Hash function MD5 to turn that into a irreversible hash.
+```javascript
+const user = new User({
+    email: req.body.username,
+    password: md5(req.body.password)
+  })
+```
+<br />
+
+* Modified the logic inside the handler function of the 'POST' requests made on the `/register` route:
+```javascript
+if(user.password === md5(req.body.password)) {
+  res.render('secrets');
+}
+```
+<br />
+
+
+<!-- 10. Handled the HTTP 'GET' requests made on the '/logout' route, so that the logged in users can log out:
+```javascript
+app.get('/logout', (req, res) => {
+  res.redirect('/')
+})
+```
+<br /> -->

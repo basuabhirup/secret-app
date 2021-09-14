@@ -4,7 +4,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const ejs = require('ejs');
 const mongoose = require('mongoose');
-const encrypt = require('mongoose-encryption');
+const md5 = require('md5');
 
 
 // Assign a port for localhost as well as final deployement:
@@ -27,9 +27,6 @@ const userSchema = new mongoose.Schema({
   email: String,
   password: String
 });
-// Add the encryption package to our userSchema before creating the User model:
-let secret = process.env.SECRET_STRING;
-userSchema.plugin(encrypt, { secret: secret, encryptedFields: ['password'] });
 
 const User = new mongoose.model('User', userSchema);
 
@@ -62,7 +59,7 @@ app.get('/logout', (req, res) => {
 app.post('/register', (req, res) => {
   const user = new User({
     email: req.body.username,
-    password: req.body.password
+    password: md5(req.body.password)
   })
   user.save(err => {
     if(err) {
@@ -80,7 +77,7 @@ app.post('/login', (req, res) => {
       res.send(err);
     } else {
       if(user) {
-        if(user.password === req.body.password) {
+        if(user.password === md5(req.body.password)) {
           res.render('secrets');
         } else {
           res.send("Please check your password and try again...");
