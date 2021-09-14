@@ -99,3 +99,50 @@ const User = new mongoose.model('User', userSchema);
 ```
 <br />
 
+12. Handled the HTTP 'POST' requests made on the `/register` route, so that it creates a new user document in the database to store their emails and passwords:
+```javascript
+app.post('/register', (req, res) => {
+  const user = new User({
+    email: req.body.username,
+    password: req.body.password
+  })
+  user.save(err => {
+    if(err) {
+      console.log(err);
+    } else {
+      res.render('secrets');
+    }
+  })
+})
+```
+<br />
+
+13. Handled the HTTP 'POST' requests made on the `/login` route, so that the registered users can seamlessly login to the app with their credentials:
+```javascript
+app.post('/login', (req, res) => {
+  User.findOne({email: req.body.username}, (err, user) => {
+    if(err) {
+      res.send(err);
+    } else {
+      if(user) {
+        if(user.password === req.body.password) {
+          res.render('secrets');
+        } else {
+          res.send("Please check your password and try again...");
+        }
+      } else {
+        res.send("Please check your username and try again...");
+      }
+    }
+  })
+})
+```
+<br />
+
+14. Handled the HTTP 'GET' requests made on the '/logout' route, so that the logged in users can log out:
+```javascript
+app.get('/logout', (req, res) => {
+  res.redirect('/');
+})
+```
+<br />
