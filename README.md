@@ -96,7 +96,7 @@ const User = new mongoose.model('User', userSchema);
 ```
 <br />
 
-9. Experimented and went through 6 levels of security
+9. Experimented and went through 6 different levels of security:
 
 ### Level 1 Security: Login with registered Username and Password
 * Handled the HTTP 'POST' requests made on the `/register` route, so that it creates a new user document in the database to store their emails and passwords:
@@ -155,6 +155,7 @@ userSchema.plugin(encrypt, { secret: secret, encryptedFields: ['password'] });
 <br />
 
 * `mongoose-encryption` package is smart enough to decrypt the passwords from the database whenever POST requests are created on the `/login` route. Therefore, anyone having access to the server code in `app.js` file can get access to all the users' passwords.
+<br />
 
 ### Level 3 Security: Hashing passwords
 * Insalled the `md5` module using `npm i md5` command and required the same in our `app.js` file:
