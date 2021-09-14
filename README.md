@@ -142,7 +142,23 @@ app.post('/login', (req, res) => {
 14. Handled the HTTP 'GET' requests made on the '/logout' route, so that the logged in users can log out:
 ```javascript
 app.get('/logout', (req, res) => {
-  res.redirect('/');
+  res.redirect('/')
 })
 ```
 <br />
+
+15. Installed the `mongoose-encryption` NPM module using `npm i mongoose-encryption` command and required the same inside our `app.js` file:
+```javascript
+const encrypt = require('mongoose-encryption');
+```
+<br />
+
+16. Created a long unguessable secret key as an environment variable inside the `.env` file and added an encryption package to our userSchema to keep the users' passwords encrypted:
+```javascript
+// Add the encryption package to our userSchema before creating the User model:
+let secret = process.env.SECRET_STRING;
+userSchema.plugin(encrypt, { secret: secret, encryptedFields: ['password'] });
+```
+<br />
+
+17. `mongoose-encryption` package is smart enough to decrypt the passwords from the database whenever POST requests are created on the `/login` route.

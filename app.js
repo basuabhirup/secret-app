@@ -4,9 +4,12 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const ejs = require('ejs');
 const mongoose = require('mongoose');
+const encrypt = require('mongoose-encryption');
+
 
 // Assign a port for localhost as well as final deployement:
 const port = process.env.PORT || 3000;
+
 
 // Initial setup for the server:
 const app = express();
@@ -20,7 +23,14 @@ app.use(bodyParser.urlencoded({extended: true}));
 mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.m5s9h.mongodb.net/userDB`);
 
 // Create a new collection named 'users' to store the emails and passwords of the users:
-const userSchema = new mongoose.Schema({email: String, password: String});
+const userSchema = new mongoose.Schema({
+  email: String,
+  password: String
+});
+// Add the encryption package to our userSchema before creating the User model:
+let secret = process.env.SECRET_STRING;
+userSchema.plugin(encrypt, { secret: secret, encryptedFields: ['password'] });
+
 const User = new mongoose.model('User', userSchema);
 
 
