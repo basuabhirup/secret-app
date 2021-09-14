@@ -3,7 +3,7 @@ This project is a part of "The Complete 2021 Web Development Bootcamp" by The Lo
 
 ## Objective of this Project:
 - To create an app where the registered users can share secrets anonymously.
-- To restrict access to the secrets by all the non-registered users.
+- To restrict access of the secrets to all the non-registered users.
 - To add authentication to the app so that individual users would sign up with a username and password.
 - To enable users to log into the app using their username and password to access to the secrets.
 
@@ -164,7 +164,7 @@ const md5 = require('md5');
 ```
 <br />
 
-* Modified the user object inside the handler function of the 'POST' requests made on the `/register` route, so that instead of storing the users' passwords in our database, we use our Hash function MD5 to turn that into a irreversible hash.
+* Modified the user object inside the handler function of the 'POST' requests made on the `/register` route, so that instead of storing the users' passwords in our database, we use our Hash function MD5 to turn that into an irreversible hash.
 ```javascript
 const user = new User({
     email: req.body.username,
