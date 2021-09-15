@@ -9,7 +9,7 @@ This project is a part of "The Complete 2021 Web Development Bootcamp" by The Lo
 
 ## Steps I have followed:
 
-### 1. Basic Server Setup:
+### Basic Server Setup:
 1. Initialized NPM inside the project directory using `npm init -y` command from the terminal.
 2. Used `npm i express body-parser ejs mongoose dotenv` command to install these dependencies for our project.
 3. Initialized the server with the following code inside the `app.js` file:
@@ -98,9 +98,9 @@ const User = new mongoose.model('User', userSchema);
 ```
 <br />
 
-### 2. Experimented with 6 different levels of security:
+### 2. Experiment with 6 different levels of security:
 
-#### Level 1 Security: Login with registered Username and Password
+### Level 1 Security: Login with registered Username and Password
 * Handled the HTTP `POST` requests made on the `/register` route, so that it creates a new user document in the database to store their emails and passwords:
 ```javascript
 app.post('/register', (req, res) => {
@@ -141,7 +141,7 @@ app.post('/login', (req, res) => {
 ```
 <br />
 
-#### Level 2 Security: Database Encryption
+### Level 2 Security: Database Encryption
 * Installed the `mongoose-encryption` NPM module using `npm i mongoose-encryption` command and required the same inside our `app.js` file:
 ```javascript
 const encrypt = require('mongoose-encryption');
@@ -159,14 +159,14 @@ userSchema.plugin(encrypt, { secret: secret, encryptedFields: ['password'] });
 * `mongoose-encryption` package is smart enough to decrypt the passwords from the database whenever POST requests are created on the `/login` route. Therefore, anyone having access to the server code in `app.js` file can get access to all the users' passwords.
 <br />
 
-#### Level 3 Security: Hashing passwords with MD5
+### Level 3 Security: Hashing passwords with MD5
 * Insalled the `md5` module using `npm i md5` command and required the same in our `app.js` file:
 ```javascript
 const md5 = require('md5');
 ```
 <br />
 
-* Modified the user object inside the handler function of the `POST` requests made on the `/register` route, so that instead of storing the users' passwords in our database, we use our Hash function MD5 to turn that into a irreversible hash.
+* Modified the user object inside the handler function of the `POST` requests made on the `/register` route, so that instead of storing the users' passwords in our database, we use our Hash function MD5 to turn that into an irreversible hash.
 ```javascript
 const user = new User({
     email: req.body.username,
@@ -183,14 +183,14 @@ if(user.password === md5(req.body.password)) {
 ```
 <br />
 
-#### Level 4 Security: Salting and Hashing passwords with bcrypt
+### Level 4 Security: Salting and Hashing passwords with bcrypt
 * Insalled the `bcrypt` module using `npm i bcrypt` command and required the same in our `app.js` file:
 ```javascript
 const bcrypt = require('bcrypt');
 ```
 <br />
 
-* Modified handler of `POST` requests made on the `/register` route:
+* Modified handler of `POST` requests made on the `/register` route, to turn the users' passwords into a complex hash using 10 rounds of salting:
 ```javascript
 app.post('/register', (req, res) => {
   bcrypt.hash(req.body.password, 10, (err, hash) => {
@@ -224,6 +224,10 @@ if(user) {
   res.send("Please check your username and try again...");
 }
 ```
+<br />
+
+
+
 
 <!-- 10. Handled the HTTP 'GET' requests made on the '/logout' route, so that the logged in users can log out:
 ```javascript
