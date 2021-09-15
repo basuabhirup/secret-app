@@ -226,13 +226,98 @@ if(user) {
 ```
 <br />
 
-
-
-
-<!-- 10. Handled the HTTP 'GET' requests made on the '/logout' route, so that the logged in users can log out:
+### Level 5 Security: Add Cookies and Sessions using Passport.js
+* Insalled the `passport`, `passport-local`, `passport-local-mongoose`and `express-session`  modules using ` npm i passport passport-local passport-local-mongoose express-session` command from terminal and required them inside our `app.js` file, maintaining order as following:
 ```javascript
-app.get('/logout', (req, res) => {
-  res.redirect('/')
+const session = require('express-session');
+const passport = require('passport');
+const passportLocalMongoose = require('passport-local-mongoose');
+```
+`Note`: We don't need to require the `passport-local` module explicitly as it will be automatically required by the `passport-local-mongoose` module.
+<br />
+
+* Created a `SECRET_KEY` as an environment variable inside the `.env` file, configured `session` below all the `app.use` commands and initialized `passport` right below this:
+```javascript
+app.use(session({
+  secret: process.env.SECRET_KEY,
+  resave: false,
+  saveUninitialized: false
+}))
+app.use(passport.initialize());
+app.use(passport.session());
+```
+<br />
+
+* Added `passportLocalMongoose` plugin to the `userSchema` before creating the User model, so that it can salt and hash the users' passwords before saving them to the database:
+```javascript
+userSchema.plugin(passportLocalMongoose);
+```
+<br />
+
+* Added `passport-local` configurations right below the User model:
+```javascript
+// Add passport-local Configuration:
+passport.use(User.createStrategy());
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+```
+<br/>
+
+* Handled the HTTP `POST` requests made on the `/register` route, using some methods from the `passport` and the `passportLocalMongoose` packages:
+```javascript
+app.post('/register', (req, res) => {
+  User.register({username: req.body.username}, req.body.password, (err, user) => {
+    if(err){
+      console.log(err);
+      res.redirect('/register');
+    } else {
+      passport.authenticate('local')(req, res, () => {
+        res.redirect('/secrets');
+      })
+    }
+  })
 })
 ```
-<br /> -->
+<br />
+
+* Handled the HTTP `POST` requests made on the `/login` route, using some methods from the `passport` and the `passportLocalMongoose` packages:
+```javascript
+app.post('/login', (req, res) => {
+  const user = new User({
+    username: req.body.username,
+    password: req.body.password
+  })
+  req.login(user, err => {
+    if(err) {
+      console.log(err);
+    } else {
+      passport.authenticate('local')(req, res, () => {
+        res.redirect('/secrets');
+      })
+    }
+  })
+})
+```
+<br />
+
+* Handled the HTTP `GET` requests made on the `/secrets` route, so that only the logged in authenticated users can get access to the secrets:
+```javascript
+app.get('/secrets', (req, res) => {
+  if(req.isAuthenticated()) {
+    res.render('secrets');
+  } else {
+    res.redirect('/login');
+  }
+})
+```
+<br />
+
+* Handled the HTTP 'GET' requests made on the '/logout' route to deauthenticate the user and end the user session, using the `req.logout()` method from the `passport` module:
+```javascript
+app.get('/logout', (req, res) => {
+  req.logout();
+  res.redirect('/');
+})
+```
+<br />
