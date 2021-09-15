@@ -4,7 +4,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const ejs = require('ejs');
 const mongoose = require('mongoose');
-const md5 = require('md5');
+const bcrypt = require('bcrypt');
 
 
 // Assign a port for localhost as well as final deployement:
@@ -57,16 +57,18 @@ app.get('/logout', (req, res) => {
 
 // Handle 'POST' requests made on the '/register' route:
 app.post('/register', (req, res) => {
-  const user = new User({
-    email: req.body.username,
-    password: md5(req.body.password)
-  })
-  user.save(err => {
-    if(err) {
-      console.log(err);
-    } else {
-      res.render('secrets');
-    }
+  bcrypt.hash(req.body.password, 10, (err, hash) => {
+    const user = new User({
+      email: req.body.username,
+      password: hash
+    })
+    user.save(err => {
+      if(err) {
+        console.log(err);
+      } else {
+        res.render('secrets');
+      }
+    })
   })
 })
 
@@ -77,11 +79,13 @@ app.post('/login', (req, res) => {
       res.send(err);
     } else {
       if(user) {
-        if(user.password === md5(req.body.password)) {
-          res.render('secrets');
-        } else {
-          res.send("Please check your password and try again...");
-        }
+        bcrypt.compare(req.body.password, user.password, (err, result) => {
+          if(result === true) {
+            res.render('secrets');
+          } else {
+            res.send("Please check your password and try again...");
+          }
+        })
       } else {
         res.send("Please check your username and try again...");
       }

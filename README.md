@@ -8,6 +8,8 @@ This project is a part of "The Complete 2021 Web Development Bootcamp" by The Lo
 - To enable users to log into the app using their username and password to access to the secrets.
 
 ## Steps I have followed:
+
+### 1. Basic Server Setup:
 1. Initialized NPM inside the project directory using `npm init -y` command from the terminal.
 2. Used `npm i express body-parser ejs mongoose dotenv` command to install these dependencies for our project.
 3. Initialized the server with the following code inside the `app.js` file:
@@ -96,10 +98,10 @@ const User = new mongoose.model('User', userSchema);
 ```
 <br />
 
-9. Experimented and went through 6 different levels of security:
+### 2. Experimented with 6 different levels of security:
 
-### Level 1 Security: Login with registered Username and Password
-* Handled the HTTP 'POST' requests made on the `/register` route, so that it creates a new user document in the database to store their emails and passwords:
+#### Level 1 Security: Login with registered Username and Password
+* Handled the HTTP `POST` requests made on the `/register` route, so that it creates a new user document in the database to store their emails and passwords:
 ```javascript
 app.post('/register', (req, res) => {
   const user = new User({
@@ -117,7 +119,7 @@ app.post('/register', (req, res) => {
 ```
 <br />
 
-* Handled the HTTP 'POST' requests made on the `/login` route, so that the registered users can seamlessly login to the app with their credentials:
+* Handled the HTTP `POST` requests made on the `/login` route, so that the registered users can seamlessly login to the app with their credentials:
 ```javascript
 app.post('/login', (req, res) => {
   User.findOne({email: req.body.username}, (err, user) => {
@@ -139,14 +141,14 @@ app.post('/login', (req, res) => {
 ```
 <br />
 
-### Level 2 Security: Database Encryption
+#### Level 2 Security: Database Encryption
 * Installed the `mongoose-encryption` NPM module using `npm i mongoose-encryption` command and required the same inside our `app.js` file:
 ```javascript
 const encrypt = require('mongoose-encryption');
 ```
 <br />
 
-* Created a long unguessable secret key as an environment variable inside the `.env` file and added an encryption package to our userSchema to keep the users' passwords encrypted:
+* Created a long unguessable secret key as an environment variable inside the `.env` file and added an encryption package to our `userSchema` to keep the users' passwords encrypted:
 ```javascript
 // Add the encryption package to our userSchema before creating the User model:
 let secret = process.env.SECRET_STRING;
@@ -157,14 +159,14 @@ userSchema.plugin(encrypt, { secret: secret, encryptedFields: ['password'] });
 * `mongoose-encryption` package is smart enough to decrypt the passwords from the database whenever POST requests are created on the `/login` route. Therefore, anyone having access to the server code in `app.js` file can get access to all the users' passwords.
 <br />
 
-### Level 3 Security: Hashing passwords
+#### Level 3 Security: Hashing passwords with MD5
 * Insalled the `md5` module using `npm i md5` command and required the same in our `app.js` file:
 ```javascript
 const md5 = require('md5');
 ```
 <br />
 
-* Modified the user object inside the handler function of the 'POST' requests made on the `/register` route, so that instead of storing the users' passwords in our database, we use our Hash function MD5 to turn that into a irreversible hash.
+* Modified the user object inside the handler function of the `POST` requests made on the `/register` route, so that instead of storing the users' passwords in our database, we use our Hash function MD5 to turn that into a irreversible hash.
 ```javascript
 const user = new User({
     email: req.body.username,
@@ -173,7 +175,7 @@ const user = new User({
 ```
 <br />
 
-* Modified the logic inside the handler function of the 'POST' requests made on the `/login` route:
+* Modified the logic inside the handler function of the `POST` requests made on the `/login` route:
 ```javascript
 if(user.password === md5(req.body.password)) {
   res.render('secrets');
@@ -181,6 +183,47 @@ if(user.password === md5(req.body.password)) {
 ```
 <br />
 
+#### Level 4 Security: Salting and Hashing passwords with bcrypt
+* Insalled the `bcrypt` module using `npm i bcrypt` command and required the same in our `app.js` file:
+```javascript
+const bcrypt = require('bcrypt');
+```
+<br />
+
+* Modified handler of `POST` requests made on the `/register` route:
+```javascript
+app.post('/register', (req, res) => {
+  bcrypt.hash(req.body.password, 10, (err, hash) => {
+    const user = new User({
+      email: req.body.username,
+      password: hash
+    })
+    user.save(err => {
+      if(err) {
+        console.log(err);
+      } else {
+        res.render('secrets');
+      }
+    })
+  })  
+})
+```
+<br />
+
+* Modified handler of `POST` requests made on the `/login` route:
+```javascript
+if(user) {
+  bcrypt.compare(req.body.password, user.password, (err, result) => {
+    if(result === true) {
+      res.render('secrets');
+    } else {
+      res.send("Please check your password and try again...");
+    }
+  })
+} else {
+  res.send("Please check your username and try again...");
+}
+```
 
 <!-- 10. Handled the HTTP 'GET' requests made on the '/logout' route, so that the logged in users can log out:
 ```javascript
