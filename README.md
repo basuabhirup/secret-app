@@ -409,3 +409,5 @@ passport.deserializeUser(function(id, done) {
 }
 ```
 <br />
+
+* Similary, created Facebook Sign-in authentication using `passport-facebook` module, with the help of its [official documentation page](https://www.passportjs.org/packages/passport-facebook/). Created a Test App in [Facebook Developers Console](https://developers.facebook.com) to test the authentication.

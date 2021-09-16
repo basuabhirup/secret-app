@@ -20,5 +20,10 @@ body {
 }
 
 .social-block > * {
-  padding: 0;
+  padding: 0.2rem;
+  margin-bottom:
+}
+
+.btn-social {
+  margin: 0.5rem auto 0.75rem;
 }

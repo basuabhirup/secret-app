@@ -9,7 +9,9 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const passportLocalMongoose = require('passport-local-mongoose');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const FacebookStrategy = require('passport-facebook').Strategy;
 const findOrCreate = require('mongoose-findorcreate');
+
 
 // Assign a port for localhost as well as final deployement:
 const port = process.env.PORT || 3000;
@@ -47,7 +49,9 @@ userSchema.plugin(findOrCreate);
 // Create User model based on userSchema:
 const User = new mongoose.model('User', userSchema);
 
-// Add passport-local Configuration:
+
+
+// Configure passport-local strategy:
 passport.use(new LocalStrategy(User.authenticate()));
 
 passport.serializeUser(function(user, done) {
@@ -60,12 +64,13 @@ passport.deserializeUser(function(id, done) {
   });
 });
 
-// Add passport-google-OAuth20 strategy configuration:
+
+
+// Configure passport-google-OAuth20 strategy:
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: 'http://localhost:3000/auth/google/secrets',
-
+    callbackURL: 'http://localhost:3000/auth/google/secrets'
   },
   function(accessToken, refreshToken, profile, cb) {
     const id = profile.id;
@@ -74,6 +79,24 @@ passport.use(new GoogleStrategy({
       (err, user) => {
       return cb(err, user);
     })
+  }
+))
+
+
+
+// Configure passport-facebook Strategy:
+passport.use(new FacebookStrategy({
+    clientID: process.env.FACEBOOK_APP_ID,
+    clientSecret: process.env.FACEBOOK_APP_SECRET,
+    callbackURL: "http://localhost:3000/auth/facebook/secrets",
+    profileFields: ['email']
+  },
+  function(accessToken, refreshToken, profile, cb) {
+    console.log(profile);
+    User.findOrCreate({ facebookId: profile.id },
+      (err, user) => {
+      return cb(err, user);
+    });
   }
 ))
 
@@ -95,6 +118,16 @@ app.get('/auth/google/secrets',
   (req, res) => {
     res.redirect('/secrets');
   });
+
+// Handle 'GET' requests made on the '/auth/facebook' route:
+app.get('/auth/facebook', passport.authenticate('facebook'));
+
+// Handle 'GET' requests made on the '/auth/facebook/secrets' route:
+app.get('/auth/facebook/secrets',
+  passport.authenticate('facebook', { failureRedirect: '/login' }),
+  (req, res) => {
+    res.redirect('/secrets');
+  })
 
 // Handle 'GET' requests made on the '/register' route:
 app.get('/register', (req, res) => {
