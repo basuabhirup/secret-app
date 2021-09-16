@@ -8,7 +8,8 @@ const session = require('express-session');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const passportLocalMongoose = require('passport-local-mongoose');
-
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const findOrCreate = require('mongoose-findorcreate');
 
 // Assign a port for localhost as well as final deployement:
 const port = process.env.PORT || 3000;
@@ -35,11 +36,13 @@ mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cl
 // Create a new collection named 'users' to store the emails and passwords of the users:
 const userSchema = new mongoose.Schema({
   username: String,
-  password: String
+  password: String,
+  googleId: String
 })
 
-// Add 'passportLocalMongoose' plugin to the userSchema before creating the User model:
+// Add plugins to the userSchema before creating the User model:
 userSchema.plugin(passportLocalMongoose);
+userSchema.plugin(findOrCreate);
 
 // Create User model based on userSchema:
 const User = new mongoose.model('User', userSchema);
@@ -47,8 +50,32 @@ const User = new mongoose.model('User', userSchema);
 // Add passport-local Configuration:
 passport.use(new LocalStrategy(User.authenticate()));
 
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+passport.serializeUser(function(user, done) {
+  done(null, user.id);
+});
+
+passport.deserializeUser(function(id, done) {
+  User.findById(id, function(err, user) {
+    done(err, user);
+  });
+});
+
+// Add passport-google-OAuth20 strategy configuration:
+passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: 'http://localhost:3000/auth/google/secrets',
+
+  },
+  function(accessToken, refreshToken, profile, cb) {
+    const id = profile.id;
+    const userEmail = profile.emails[0].value;
+    User.findOrCreate({ username: userEmail, googleId: id },
+      (err, user) => {
+      return cb(err, user);
+    })
+  }
+))
 
 
 
@@ -58,6 +85,16 @@ passport.deserializeUser(User.deserializeUser());
 app.get('/', (req, res) => {
   res.render('home');
 })
+
+// Handle 'GET' requests made on the '/auth/google' route:
+app.get('/auth/google', passport.authenticate('google', {scope: ['profile', 'email'] }));
+
+// Handle 'GET' requests made on the '/auth/google/secrets' route:
+app.get('/auth/google/secrets',
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  (req, res) => {
+    res.redirect('/secrets');
+  });
 
 // Handle 'GET' requests made on the '/register' route:
 app.get('/register', (req, res) => {

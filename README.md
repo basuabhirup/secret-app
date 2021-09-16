@@ -160,7 +160,7 @@ userSchema.plugin(encrypt, { secret: secret, encryptedFields: ['password'] });
 <br />
 
 ### Level 3 Security: Hashing passwords with MD5
-* Insalled the `md5` module using `npm i md5` command and required the same in our `app.js` file:
+* Installed the `md5` module using `npm i md5` command and required the same in our `app.js` file:
 ```javascript
 const md5 = require('md5');
 ```
@@ -184,7 +184,7 @@ if(user.password === md5(req.body.password)) {
 <br />
 
 ### Level 4 Security: Salting and Hashing passwords with bcrypt
-* Insalled the `bcrypt` module using `npm i bcrypt` command and required the same in our `app.js` file:
+* Installed the `bcrypt` module using `npm i bcrypt` command and required the same in our `app.js` file:
 ```javascript
 const bcrypt = require('bcrypt');
 ```
@@ -227,7 +227,7 @@ if(user) {
 <br />
 
 ### Level 5 Security: Add Cookies and Sessions using Passport.js
-* Insalled the `passport`, `passport-local`, `passport-local-mongoose`and `express-session`  modules using ` npm i passport passport-local passport-local-mongoose express-session` command from terminal and required them inside our `app.js` file, maintaining order as following:
+* Installed the `passport`, `passport-local`, `passport-local-mongoose`and `express-session`  modules using ` npm i passport passport-local passport-local-mongoose express-session` command from terminal and required them inside our `app.js` file, maintaining order as following:
 ```javascript
 const session = require('express-session');
 const passport = require('passport');
@@ -312,3 +312,82 @@ app.get('/logout', (req, res) => {
 })
 ```
 <br />
+
+### Level 6 Security: Implementing Google Sign In using Third Party OAuth 2.0
+* Installed the `passport-google-oauth20` and `mongoose-findorcreate` modules using `npm i passport-google-oauth20 mongoose-findorcreate` command and required them inside our `app.js` file:
+```javascript
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const findOrCreate = require('mongoose-findorcreate');
+```
+<br />
+
+* Created a new project in the [Google Developers Console](https://console.developers.google.com/), generated OAuth 2.0 client ID with source URI as `http://localhost:3000`, redirect URI as `http://localhost:3000/auth/google/secrets` and stored the credentials in our `.env` file as environment variables `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`.
+* Added the `findOrCreate` function as a plugin to the `userSchema` before creating the User model:
+```javascript
+userSchema.plugin(findOrCreate);
+```
+<br />
+
+* Configured `passport-google-OAuth20` strategy:
+```javascript
+// Add passport-google-OAuth20 strategy configuration:
+passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: 'http://localhost:3000/auth/google/secrets',
+
+  },
+  function(accessToken, refreshToken, profile, cb) {
+    const id = profile.id;
+    const userEmail = profile.emails[0].value;
+    User.findOrCreate({ username: userEmail, googleId: id },
+      (err, user) => {
+      return cb(err, user);
+    })
+  }
+))
+```
+<br />
+
+* Added a `googleId` field to the `userSchema`:
+```javascript
+const userSchema = new mongoose.Schema({
+  username: String,
+  password: String,
+  googleId: String
+})
+```
+<br />
+
+* Created Google 'Sign Up' and 'Sign In' buttons to make `GET` requests on the `/auth/google` route:
+* Handled `GET` requests made on the `/auth/google` route:
+```javascript
+app.get('/auth/google', passport.authenticate('google', {scope: ['profile', 'email'] }));
+```
+<br />
+
+* Handled `GET` requests made on the authorized redirect route `/auth/google/secrets`:
+```javascript
+app.get('/auth/google/secrets',
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  (req, res) => {
+    res.redirect('/secrets');
+  });
+```
+<br />
+
+* Modified passport-local configurations and updated the methods of serialize and deserialize users to make them compatible with all OAuth strategies:
+```javascript
+passport.serializeUser(function(user, done) {
+  done(null, user.id);
+});
+
+passport.deserializeUser(function(id, done) {
+  User.findById(id, function(err, user) {
+    done(err, user);
+  });
+});
+```
+<br />
+
+*
