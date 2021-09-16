@@ -98,7 +98,7 @@ const User = new mongoose.model('User', userSchema);
 ```
 <br />
 
-### 2. Experiment with 6 different levels of security:
+### Experiment with 6 different levels of security:
 
 ### Level 1 Security: Login with registered Username and Password
 * Handled the HTTP `POST` requests made on the `/register` route, so that it creates a new user document in the database to store their emails and passwords:
@@ -390,4 +390,22 @@ passport.deserializeUser(function(id, done) {
 ```
 <br />
 
-*
+* Modified styles of the login button using [bootstrap-social](https://lipis.github.io/bootstrap-social/) stylesheets:
+```html
+<link rel="stylesheet" href="css/bootstrap-social.css">
+```
+```html
+<a class="btn btn-block btn-social btn-twitter" href="/auth/google" role="button">
+  <i class="fab fa-google"></i>
+  Sign In with Google
+</a>
+```
+```css
+.card:nth-child(1) {
+  margin-bottom: 1rem;
+}
+.social-block > * {
+  padding: 0;
+}
+```
+<br />

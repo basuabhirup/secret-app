@@ -14,3 +14,11 @@ body {
   color: #fff;
   background-color: #000;
 }
+
+.card:nth-child(1) {
+  margin-bottom: 1rem;
+}
+
+.social-block > * {
+  padding: 0;
+}
