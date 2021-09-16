@@ -231,9 +231,9 @@ if(user) {
 ```javascript
 const session = require('express-session');
 const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
 const passportLocalMongoose = require('passport-local-mongoose');
 ```
-`Note`: We don't need to require the `passport-local` module explicitly as it will be automatically required by the `passport-local-mongoose` module.
 <br />
 
 * Created a `SECRET_KEY` as an environment variable inside the `.env` file, configured `session` below all the `app.use` commands and initialized `passport` right below this:
@@ -257,7 +257,7 @@ userSchema.plugin(passportLocalMongoose);
 * Added `passport-local` configurations right below the User model:
 ```javascript
 // Add passport-local Configuration:
-passport.use(User.createStrategy());
+passport.use(new LocalStrategy(User.authenticate()));
 
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
@@ -269,8 +269,10 @@ passport.deserializeUser(User.deserializeUser());
 app.post('/register', (req, res) => {
   User.register({username: req.body.username}, req.body.password, (err, user) => {
     if(err){
-      console.log(err);
-      res.redirect('/register');
+      res.send(`
+        <h3 style="font-family:sans-serif; color:red;">${err.message}</h3>
+        <button type="button" style="font-size:1rem; cursor:pointer;" onclick="window.location.href='/register'">Go back to Registration Page</buton>
+        `);
     } else {
       passport.authenticate('local')(req, res, () => {
         res.redirect('/secrets');
@@ -283,21 +285,10 @@ app.post('/register', (req, res) => {
 
 * Handled the HTTP `POST` requests made on the `/login` route, using some methods from the `passport` and the `passportLocalMongoose` packages:
 ```javascript
-app.post('/login', (req, res) => {
-  const user = new User({
-    username: req.body.username,
-    password: req.body.password
-  })
-  req.login(user, err => {
-    if(err) {
-      console.log(err);
-    } else {
-      passport.authenticate('local')(req, res, () => {
-        res.redirect('/secrets');
-      })
-    }
-  })
-})
+app.post('/login', passport.authenticate('local', {
+  successRedirect: '/secrets',
+  failureRedirect: '/login',
+}));
 ```
 <br />
 

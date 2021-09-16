@@ -6,6 +6,7 @@ const ejs = require('ejs');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
 const passportLocalMongoose = require('passport-local-mongoose');
 
 
@@ -33,7 +34,7 @@ mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cl
 
 // Create a new collection named 'users' to store the emails and passwords of the users:
 const userSchema = new mongoose.Schema({
-  email: String,
+  username: String,
   password: String
 })
 
@@ -44,7 +45,7 @@ userSchema.plugin(passportLocalMongoose);
 const User = new mongoose.model('User', userSchema);
 
 // Add passport-local Configuration:
-passport.use(User.createStrategy());
+passport.use(new LocalStrategy(User.authenticate()));
 
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
@@ -88,8 +89,10 @@ app.get('/logout', (req, res) => {
 app.post('/register', (req, res) => {
   User.register({username: req.body.username}, req.body.password, (err, user) => {
     if(err){
-      console.log(err);
-      res.redirect('/register');
+      res.send(`
+        <h3 style="font-family:sans-serif; color:red;">${err.message}</h3>
+        <button type="button" style="font-size:1rem; cursor:pointer;" onclick="window.location.href='/register'">Go back to Registration Page</buton>
+        `);
     } else {
       passport.authenticate('local')(req, res, () => {
         res.redirect('/secrets');
@@ -99,21 +102,10 @@ app.post('/register', (req, res) => {
 })
 
 // Handle 'POST' requests made on the '/login' route:
-app.post('/login', (req, res) => {
-  const user = new User({
-    username: req.body.username,
-    password: req.body.password
-  })
-  req.login(user, err => {
-    if(err) {
-      console.log(err);
-    } else {
-      passport.authenticate('local')(req, res, () => {
-        res.redirect('/secrets');
-      })
-    }
-  })
-})
+app.post('/login', passport.authenticate('local', {
+  successRedirect: '/secrets',
+  failureRedirect: '/login',
+}));
 
 // Handle 'POST' requests made on the '/submit' route:
 
