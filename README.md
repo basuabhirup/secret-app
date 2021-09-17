@@ -473,3 +473,5 @@ app.get('/secrets', (req, res) => {
 })
 ```
 <br />
+
+* Finally, created a `Procfile` and made necessary changes to prepare the codebase for deployment via Heroku server.
