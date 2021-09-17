@@ -40,7 +40,8 @@ const userSchema = new mongoose.Schema({
   username: String,
   password: String,
   googleId: String,
-  facebookId: String
+  facebookId: String,
+  secrets: [{secret: String}]
 })
 
 // Add plugins to the userSchema before creating the User model:
@@ -102,7 +103,7 @@ passport.use(new FacebookStrategy({
 
 
 
-// Handle HTTP requests:
+// Handle HTTP 'GET' requests:
 
 // Handle 'GET' requests made on the '/' route:
 app.get('/', (req, res) => {
@@ -143,7 +144,25 @@ app.get('/login', (req, res) => {
 app.get('/secrets', (req, res) => {
   res.set('Cache-Control', 'no-store');
   if(req.isAuthenticated()) {
-    res.render('secrets');
+    User.find({'secret': {$ne: null}}, (err, users) => {
+      if(err) {
+        console.log(err);
+      } else {
+        if (users) {
+          res.render('secrets', {users: users});
+        }
+      }
+    })
+  } else {
+    res.redirect('/login');
+  }
+})
+
+// Handle 'GET' requests made on the '/submit' route:
+app.get('/submit', (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  if(req.isAuthenticated()) {
+    res.render('submit');
   } else {
     res.redirect('/login');
   }
@@ -155,6 +174,8 @@ app.get('/logout', (req, res) => {
   res.redirect('/');
 })
 
+
+// Handle HTTP 'POST' requests:
 
 // Handle 'POST' requests made on the '/register' route:
 app.post('/register', (req, res) => {
@@ -179,7 +200,20 @@ app.post('/login', passport.authenticate('local', {
 }));
 
 // Handle 'POST' requests made on the '/submit' route:
-
+app.post('/submit',(req, res) => {
+  User.findOne({ _id: req.user._id}, (err, user) => {
+    if(err) {
+      console.log(err);
+    } else {
+      if(user) {
+        user.secrets.push({secret: req.body.secret});
+        user.save(() => {
+          res.redirect('/secrets')
+        });
+      }
+    }
+  })
+})
 
 
 

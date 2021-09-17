@@ -313,7 +313,7 @@ app.get('/logout', (req, res) => {
 ```
 <br />
 
-### Level 6 Security: Implementing Google Sign In using Third Party OAuth 2.0
+### Level 6 Security: Implementing Third Party Sign-in using OAuth 2.0
 * Installed the `passport-google-oauth20` and `mongoose-findorcreate` modules using `npm i passport-google-oauth20 mongoose-findorcreate` command and required them inside our `app.js` file:
 ```javascript
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
@@ -392,8 +392,84 @@ passport.deserializeUser(function(id, done) {
 
 * Modified styles of the login button using [bootstrap-social](https://lipis.github.io/bootstrap-social/) stylesheets.
 * Similary, created Facebook Sign-in authentication using `passport-facebook` module, with the help of its [official documentation page](https://www.passportjs.org/packages/passport-facebook/). Created a Test App in [Facebook Developers Console](https://developers.facebook.com) to test the authentication.
-* Fixed the back button issue by adding the following code to the handler function of the `GET` requests made on `secrets` route:
+* Fixed the back button issue by adding the following code to the handler function of the `GET` requests made on the `/secrets` route:
 ```javascript
 res.set('Cache-Control', 'no-store');
+```
+<br />
+
+### Finishing Up the App:
+* Created a new 'secrets' field inside our `userSchema` to store the secrets.
+```javascript
+const userSchema = new mongoose.Schema({
+  username: String,
+  password: String,
+  googleId: String,
+  facebookId: String,
+  secrets: [{secret: String}]
+})
+```
+<br />
+
+* Handled `GET` requests made on the `/submit` route:
+```javascript
+app.get('/submit', (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  if(req.isAuthenticated()) {
+    res.render('submit');
+  } else {
+    res.redirect('/login');
+  }
+})
+```
+<br />
+
+* Handled `POST` requests made on the `/submit` route:
+```javascript
+app.post('/submit',(req, res) => {
+  User.findOne({ _id: req.user._id}, (err, user) => {
+    if(err) {
+      console.log(err);
+    } else {
+      if(user) {
+        user.secrets.push({secret: req.body.secret});
+        user.save(() => {
+          res.redirect('/secrets')
+        });
+      }
+    }
+  })
+})
+```
+<br />
+
+* Updated the template code inside `secrets.ejs` file:
+```html
+<% users.forEach(user => { %>
+  <% user.secrets.forEach(secret => { %>
+    <p class="secret-text"><%= secret.secret %></p>
+  <% }) %>
+<% }) %>
+```
+<br />
+
+* Modified handler of `GET` requests made on the `/secrets` route:
+```javascript
+app.get('/secrets', (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  if(req.isAuthenticated()) {
+    User.find({'secret': {$ne: null}}, (err, users) => {
+      if(err) {
+        console.log(err);
+      } else {
+        if (users) {
+          res.render('secrets', {users: users});
+        }
+      }
+    })
+  } else {
+    res.redirect('/login');
+  }
+})
 ```
 <br />
