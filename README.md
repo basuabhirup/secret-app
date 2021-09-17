@@ -13,7 +13,7 @@ This project is a part of "The Complete 2021 Web Development Bootcamp" by The Lo
       - [Level 4 Security: Salting and Hashing passwords with bcrypt](#level-4-security-salting-and-hashing-passwords-with-bcrypt)
       - [Level 5 Security: Add Cookies and Sessions using Passport.js](#level-5-security-add-cookies-and-sessions-using-passportjs)
       - [Level 6 Security: Implementing Third Party Sign-in using OAuth 2.0](#level-6-security-implementing-third-party-sign-in-using-oauth-20)
-    - [Finishing Up the App:](#finishing-up-the-app)
+    - [Finishing Up the App](#finishing-up-the-app)
 
 
 ## Objective of this Project:
