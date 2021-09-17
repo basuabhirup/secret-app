@@ -474,4 +474,4 @@ app.get('/secrets', (req, res) => {
 ```
 <br />
 
-* Finally, created a `Procfile` and made necessary changes to prepare the codebase for deployment via Heroku server.
+* Finally, created a `Procfile`, replaced all `localhost:3000` links with the live deployment URI and made all other necessary changes to prepare the codebase for deployment via Heroku server.
