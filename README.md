@@ -1,6 +1,16 @@
 # Secret App
 This project is a part of "The Complete 2021 Web Development Bootcamp" by The London App Brewery, instructed by Dr. Angela Yu and hosted on Udemy.
 
+## Table of contents
+
+  - [Objective of this Project](#objective-of-this-project)
+  - [Steps I have followed](#steps-i-have-followed)
+    - [Basic Server Setup](#basic-server-setup)
+    - [Experiment with 6 different levels of security](#experiment-with-6-different-levels-of-security)
+      - [Level 1 Security](#useful-resources)
+    - [Finishing Up the App:](#finishing-up-the-app:)
+
+
 ## Objective of this Project:
 - To create an app where the registered users can share secrets anonymously.
 - To restrict access to the secrets by all the non-registered users.
@@ -474,4 +484,4 @@ app.get('/secrets', (req, res) => {
 ```
 <br />
 
-* Finally, created a `Procfile`, replaced all `localhost:3000` links with the live deployment URI and made all other necessary changes to prepare the codebase for deployment via Heroku server.
+* Finally, created a `Procfile`, replaced all `localhost:3000` links with the live deployment URIs in both the server code as well as in Google and Facebook's Developers Console, and made all other necessary changes to prepare the codebase for deployment via Heroku server.
