@@ -390,24 +390,10 @@ passport.deserializeUser(function(id, done) {
 ```
 <br />
 
-* Modified styles of the login button using [bootstrap-social](https://lipis.github.io/bootstrap-social/) stylesheets:
-```html
-<link rel="stylesheet" href="css/bootstrap-social.css">
-```
-```html
-<a class="btn btn-block btn-social btn-twitter" href="/auth/google" role="button">
-  <i class="fab fa-google"></i>
-  Sign In with Google
-</a>
-```
-```css
-.card:nth-child(1) {
-  margin-bottom: 1rem;
-}
-.social-block > * {
-  padding: 0;
-}
+* Modified styles of the login button using [bootstrap-social](https://lipis.github.io/bootstrap-social/) stylesheets.
+* Similary, created Facebook Sign-in authentication using `passport-facebook` module, with the help of its [official documentation page](https://www.passportjs.org/packages/passport-facebook/). Created a Test App in [Facebook Developers Console](https://developers.facebook.com) to test the authentication.
+* Fixed the back button issue by adding the following code to the handler function of the `GET` requests made on `secrets` route:
+```javascript
+res.set('Cache-Control', 'no-store');
 ```
 <br />
-
-* Similary, created Facebook Sign-in authentication using `passport-facebook` module, with the help of its [official documentation page](https://www.passportjs.org/packages/passport-facebook/). Created a Test App in [Facebook Developers Console](https://developers.facebook.com) to test the authentication.

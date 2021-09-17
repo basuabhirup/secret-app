@@ -39,7 +39,8 @@ mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cl
 const userSchema = new mongoose.Schema({
   username: String,
   password: String,
-  googleId: String
+  googleId: String,
+  facebookId: String
 })
 
 // Add plugins to the userSchema before creating the User model:
@@ -75,7 +76,7 @@ passport.use(new GoogleStrategy({
   function(accessToken, refreshToken, profile, cb) {
     const id = profile.id;
     const userEmail = profile.emails[0].value;
-    User.findOrCreate({ username: userEmail, googleId: id },
+    User.findOrCreate({ googleId: id },
       (err, user) => {
       return cb(err, user);
     })
@@ -92,7 +93,6 @@ passport.use(new FacebookStrategy({
     profileFields: ['email']
   },
   function(accessToken, refreshToken, profile, cb) {
-    console.log(profile);
     User.findOrCreate({ facebookId: profile.id },
       (err, user) => {
       return cb(err, user);
@@ -141,6 +141,7 @@ app.get('/login', (req, res) => {
 
 // Handle 'GET' requests made on the '/secrets' route:
 app.get('/secrets', (req, res) => {
+  res.set('Cache-Control', 'no-store');
   if(req.isAuthenticated()) {
     res.render('secrets');
   } else {
