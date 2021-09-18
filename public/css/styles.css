@@ -1,11 +1,57 @@
+html {
+  background-color: #1E2020;
+}
 
 body {
-  background-color: #E8ECEF;
+  padding: 0;
+  background-color: #1E2020;
 }
 
 .centered {
-    padding-top: 200px;
-    text-align: center;
+  background-color: #1E2020;
+  padding-top: 200px;
+  text-align: center;
+  min-height: 90vh;
+}
+
+.mt-5 {
+  min-height: 90vh
+}
+
+h1, i, .lead {
+  color: #B8B1A6;
+}
+
+.btn-light {
+  background-color: #B8B1A6;
+  border: #B8B1A6;
+  outline-color: #B8B1A6;
+}
+
+.btn-light:disabled {
+  background-color: #968984
+}
+
+.btn-dark {
+  color: #B8B1A6;
+}
+
+.btn-social {
+  color: #fff;
+}
+
+.card {
+  margin: 12px auto;
+  color: #B8B1A6;
+  font-size: 1.2rem;
+  background-color: #1A1B1C;
+  border-radius: 10px;
+}
+
+.form-control {
+  background-color: #B8B1A6;
+  border: #B8B1A6;
+  border-radius: 10px;
 }
 
 .secret-text {
@@ -21,9 +67,39 @@ body {
 
 .social-block > * {
   padding: 0.2rem;
-  margin-bottom:
 }
 
 .btn-social {
-  margin: 0.5rem auto 0.75rem;
+  margin: 0.75rem auto;
+}
+
+.jumbotron {
+  background-color: #1E2020;
+}
+
+.display-3 {
+  margin-bottom: 1rem;
+}
+
+.secret-text {
+  font-size: 1.25rem;
+  color: #B8B1A6;
+  padding: 0.5rem;
+  border-radius: 16px;
+}
+
+footer {
+  display: inline;
+  text-align: center;
+  color: #B8B1A6;
+  bottom: 0;
+}
+
+footer a {
+  color: #989186;
+}
+
+footer a:hover {
+  text-decoration: none;
+  color: #D8D1C6;
 }

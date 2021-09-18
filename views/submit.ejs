@@ -2,7 +2,7 @@
 
 <div class="container">
   <div class="jumbotron centered">
-    <i class="fas fa-key fa-6x"></i>
+    <i class="fas fa-mask fa-6x"></i>
     <h1 class="display-3">Secrets</h1>
     <p class="secret-text">Don't keep your secrets, share them anonymously!</p>
 
@@ -11,10 +11,27 @@
       <div class="form-group">
         <input type="text" class="form-control text-center" name="secret" placeholder="What's your secret?">
       </div>
-      <button type="submit" class="btn btn-dark">Submit</button>
+      <button type="submit" class="btn btn-light" disabled>Submit</button>
     </form>
 
 
   </div>
 </div>
+
+<script type="text/javascript">
+  const inputField = document.querySelector('input[name=secret]');
+  const button = document.querySelector('.btn');
+
+  function toggleButton() {
+    if(this.value.length === 0) {
+      button.disabled = true;
+    } else {
+      button.disabled = false;
+    }
+  }
+
+  inputField.addEventListener('change', toggleButton);
+  inputField.addEventListener('click', toggleButton);
+  inputField.addEventListener('keyup', toggleButton);
+</script>
 <%- include('partials/footer') %>
